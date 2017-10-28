@@ -1,4 +1,4 @@
-//  Copyright (c) 2007-2016 Hartmut Kaiser
+//  Copyright (c) 2007-2017 Hartmut Kaiser
 //  Copyright (c) 2013-2014 Thomas Heller
 //
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -18,14 +18,14 @@
 #if defined(HPX_HAVE_APEX)
 #include <hpx/util/apex.hpp>
 #endif
+#include <hpx/util/assert.hpp>
 
 #include <cstdint>
 #include <cstddef>
 #include <cstdint>
+#include <exception>
 #include <string>
 #include <utility>
-
-#include <boost/exception_ptr.hpp>
 
 namespace hpx { namespace parcelset
 {
@@ -157,22 +157,6 @@ namespace hpx { namespace parcelset
         return parcels_received_.total_serialization_time(reset);
     }
 
-#if defined(HPX_HAVE_SECURITY)
-    // the total time it took for all sender-side security operations
-    // (nanoseconds)
-    std::int64_t parcelport::get_sending_security_time(bool reset)
-    {
-        return parcels_sent_.total_security_time(reset);
-    }
-
-    // the total time it took for all receiver-side security
-    // operations (nanoseconds)
-    std::int64_t parcelport::get_receiving_security_time(bool reset)
-    {
-        return parcels_received_.total_security_time(reset);
-    }
-#endif
-
     // total data sent (bytes)
     std::int64_t parcelport::get_data_sent(bool reset)
     {
@@ -213,17 +197,10 @@ namespace hpx { namespace parcelset
         std::int64_t count = 0;
         for (auto && p : pending_parcels_)
         {
-#if defined(HPX_PARCELSET_PENDING_PARCELS_WORKAROUND)
-            count += hpx::util::get<0>(p.second)->size();
-            HPX_ASSERT(
-                hpx::util::get<0>(p.second)->size() ==
-                hpx::util::get<1>(p.second).size());
-#else
             count += hpx::util::get<0>(p.second).size();
             HPX_ASSERT(
                 hpx::util::get<0>(p.second).size() ==
                 hpx::util::get<1>(p.second).size());
-#endif
         }
         return count;
     }
@@ -301,7 +278,7 @@ namespace hpx { namespace parcelset
     {
         if (ec) {
             // all errors during early parcel handling are fatal
-            boost::exception_ptr exception =
+            std::exception_ptr exception =
                 HPX_GET_EXCEPTION(ec,
                     "early_pending_parcel_handler",
                     "error while handling early parcel: " +

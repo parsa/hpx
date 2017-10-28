@@ -1,5 +1,5 @@
 //  Copyright (c)      2014 Thomas Heller
-//  Copyright (c) 2007-2014 Hartmut Kaiser
+//  Copyright (c) 2007-2017 Hartmut Kaiser
 //  Copyright (c)      2011 Bryce Lelbach
 //
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -17,6 +17,7 @@
 #include <hpx/runtime/parcelset/locality.hpp>
 #include <hpx/runtime/parcelset/parcelport.hpp>
 #include <hpx/runtime_fwd.hpp>
+#include <hpx/util/assert.hpp>
 #include <hpx/util/bind.hpp>
 #include <hpx/util/high_resolution_timer.hpp>
 #include <hpx/util/logging.hpp>
@@ -24,9 +25,8 @@
 
 #include <hpx/plugins/parcelport_factory_base.hpp>
 
-#include <boost/atomic.hpp>
-
 #include <algorithm>
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <map>
@@ -50,6 +50,7 @@ namespace hpx { namespace parcelset
     /// parcel-handlers may be connected to a single parcelport.
     class HPX_EXPORT parcelhandler
     {
+    public:
         HPX_NON_COPYABLE(parcelhandler);
 
     private:
@@ -98,7 +99,7 @@ namespace hpx { namespace parcelset
         ///                 transport operations the parcelhandler carries out.
         parcelhandler(
             util::runtime_configuration& cfg,
-            threads::threadmanager_base* tm,
+            threads::threadmanager* tm,
             util::function_nonser<void(std::size_t, char const*)> const& on_start_thread,
             util::function_nonser<void()> const& on_stop_thread);
 
@@ -195,7 +196,7 @@ namespace hpx { namespace parcelset
         void put_parcel(parcel p, write_handler_type f);
 
         /// This put_parcel() function overload is asynchronous, but no
-        /// callback functor is provided by the user.
+        /// callback is provided by the user.
         ///
         /// \note   The function \a put_parcel() is asynchronous.
         ///
@@ -233,7 +234,7 @@ namespace hpx { namespace parcelset
         void put_parcels(std::vector<parcel> p, std::vector<write_handler_type> f);
 
         /// This put_parcel() function overload is asynchronous, but no
-        /// callback functor is provided by the user.
+        /// callback is provided by the user.
         ///
         /// \note   The function \a put_parcel() is asynchronous.
         ///
@@ -345,18 +346,6 @@ namespace hpx { namespace parcelset
         // operations (nanoseconds)
         std::int64_t get_receiving_serialization_time(
             std::string const& pp_type, bool reset) const;
-
-#if defined(HPX_HAVE_SECURITY)
-        // the total time it took for all sender-side security operations
-        // (nanoseconds)
-        std::int64_t get_sending_security_time(
-            std::string const& pp_type, bool reset) const;
-
-        // the total time it took for all receiver-side security
-        // operations (nanoseconds)
-        std::int64_t get_receiving_security_time(
-            std::string const& pp_type, bool reset) const;
-#endif
 
         // total data sent (bytes)
         std::int64_t get_data_sent(
@@ -488,13 +477,13 @@ namespace hpx { namespace parcelset
         endpoints_type endpoints_;
 
         /// the thread-manager to use (optional)
-        threads::threadmanager_base* tm_;
+        threads::threadmanager* tm_;
 
         /// Allow to use alternative parcel-ports (this is enabled only after
         /// the runtime systems of all localities are guaranteed to have
         /// reached a certain state).
-        boost::atomic<bool> use_alternative_parcelports_;
-        boost::atomic<bool> enable_parcel_handling_;
+        std::atomic<bool> use_alternative_parcelports_;
+        std::atomic<bool> enable_parcel_handling_;
 
         /// Store message handlers for actions
         mutex_type handlers_mtx_;
@@ -502,7 +491,7 @@ namespace hpx { namespace parcelset
         bool const load_message_handlers_;
 
         /// Count number of (outbound) parcels routed
-        boost::atomic<std::int64_t> count_routed_;
+        std::atomic<std::int64_t> count_routed_;
 
         /// global exception handler for unhandled exceptions thrown from the
         /// parcel layer

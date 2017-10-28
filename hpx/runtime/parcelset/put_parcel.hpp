@@ -18,9 +18,11 @@
 #include <hpx/runtime/parcelset/parcelhandler.hpp>
 #include <hpx/traits/is_action.hpp>
 #include <hpx/traits/is_continuation.hpp>
+#include <hpx/util/assert.hpp>
 #include <hpx/util/bind.hpp>
 #include <hpx/util/decay.hpp>
 #include <hpx/util/detail/pack.hpp>
+#include <hpx/util/unused.hpp>
 
 #include <cstddef>
 #include <memory>
@@ -134,6 +136,7 @@ namespace hpx { namespace parcelset {
                                  naming::address&& addr_,
                                  typename util::decay<Args>::type&&... args_)
                                 {
+                                    HPX_UNUSED(dest);
                                     pp_(detail::create_parcel::call(
                                         is_continuation,
                                         f.get(), std::move(addr_),

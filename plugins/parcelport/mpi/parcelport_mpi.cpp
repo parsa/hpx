@@ -5,6 +5,8 @@
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <hpx/config.hpp>
+
+#if defined(HPX_HAVE_NETWORKING)
 #include <hpx/traits/plugin_config_data.hpp>
 
 #if defined(HPX_HAVE_PARCELPORT_MPI)
@@ -31,11 +33,11 @@
 #include <hpx/util/runtime_configuration.hpp>
 #include <hpx/util/safe_lexical_cast.hpp>
 
-#include <boost/atomic.hpp>
 #include <boost/archive/basic_archive.hpp>
-#include <boost/exception_ptr.hpp>
 
+#include <atomic>
 #include <cstddef>
+#include <exception>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -100,7 +102,8 @@ namespace hpx { namespace parcelset
                 return
                     parcelset::locality(
                         locality(
-                            util::mpi_environment::rank()
+                            util::mpi_environment::enabled() ?
+                            util::mpi_environment::rank() : -1
                         )
                     );
             }
@@ -196,7 +199,7 @@ namespace hpx { namespace parcelset
         private:
             typedef lcos::local::spinlock mutex_type;
 
-            boost::atomic<bool> stopped_;
+            std::atomic<bool> stopped_;
 
             sender sender_;
             receiver<parcelport> receiver_;
@@ -226,7 +229,7 @@ namespace hpx { namespace parcelset
             {
                 if (ec) {
                     // all errors during early parcel handling are fatal
-                    boost::exception_ptr exception =
+                    std::exception_ptr exception =
                         hpx::detail::get_exception(hpx::exception(ec),
                             "mpi::early_write_handler", __FILE__, __LINE__,
                             "error while handling early parcel: " +
@@ -286,3 +289,5 @@ namespace hpx { namespace traits
 HPX_REGISTER_PARCELPORT(
     hpx::parcelset::policies::mpi::parcelport,
     mpi);
+
+#endif

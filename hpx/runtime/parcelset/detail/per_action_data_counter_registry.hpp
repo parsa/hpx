@@ -11,12 +11,10 @@
 #if defined(HPX_HAVE_PARCELPORT_ACTION_COUNTERS)
 #include <hpx/performance_counters/counters.hpp>
 
+#include <hpx/util/detail/pp/cat.hpp>
 #include <hpx/util/jenkins_hash.hpp>
 #include <hpx/util/function.hpp>
 #include <hpx/util/static.hpp>
-
-#include <boost/atomic.hpp>
-#include <boost/preprocessor/cat.hpp>
 
 #include <cstdint>
 #include <string>
@@ -30,6 +28,7 @@ namespace hpx { namespace parcelset { namespace detail
 {
     class HPX_EXPORT per_action_data_counter_registry
     {
+    public:
         HPX_NON_COPYABLE(per_action_data_counter_registry);
 
     public:
@@ -43,10 +42,7 @@ namespace hpx { namespace parcelset { namespace detail
             total_serialization_time,
             total_bytes,
             total_raw_bytes,
-            total_buffer_allocate_time,
-#if defined(HPX_HAVE_SECURITY)
-            total_security_time
-#endif
+            total_buffer_allocate_time
         };
 
         typedef std::unordered_set<std::string, hpx::util::jenkins_hash> map_type;
@@ -101,8 +97,8 @@ namespace hpx { namespace parcelset { namespace detail
 #define HPX_REGISTER_PER_ACTION_DATA_COUNTER_TYPES(Action)                    \
     namespace hpx { namespace parcelset { namespace detail                    \
     {                                                                         \
-        template register_per_action_data_counters<Action>                    \
-            register_per_action_data_counters<Action>::instance;              \
+        template register_per_action_data_counters< Action>                   \
+            register_per_action_data_counters< Action>::instance;             \
     }}}                                                                       \
 /**/
 

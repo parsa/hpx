@@ -10,9 +10,8 @@
 
 #include <hpx/config.hpp>
 #include <hpx/util/demangle_helper.hpp>
-#include <hpx/util/detail/pp_strip_parens.hpp>
-
-#include <boost/preprocessor/stringize.hpp>
+#include <hpx/util/detail/pp/stringize.hpp>
+#include <hpx/util/detail/pp/strip_parens.hpp>
 
 #include <type_traits>
 
@@ -25,13 +24,13 @@ namespace hpx { namespace util { namespace detail
     {};
 
     ///////////////////////////////////////////////////////////////////////////
-    template <typename VTable, typename Functor>
+    template <typename VTable, typename F>
     struct get_function_name_impl
     {
         static char const* call()
 #ifdef HPX_HAVE_AUTOMATIC_SERIALIZATION_REGISTRATION
         {
-            return util::type_id<Functor>::typeid_.type_id();
+            return util::type_id<F>::typeid_.type_id();
         }
 #else
         = delete;
@@ -39,33 +38,33 @@ namespace hpx { namespace util { namespace detail
     };
 
     ///////////////////////////////////////////////////////////////////////////
-    template <typename VTable, typename Functor>
+    template <typename VTable, typename F>
     char const* get_function_name()
     {
-        return get_function_name_impl<VTable, Functor>::call();
+        return get_function_name_impl<VTable, F>::call();
     }
 }}}
 
 ///////////////////////////////////////////////////////////////////////////////
-#define HPX_DECLARE_GET_FUNCTION_NAME(VTable, Functor, Name)                  \
+#define HPX_DECLARE_GET_FUNCTION_NAME(VTable, F, Name)                        \
     namespace hpx { namespace util { namespace detail {                       \
         template<> HPX_ALWAYS_EXPORT                                          \
         char const* get_function_name<                                        \
-            VTable, std::decay<HPX_UTIL_STRIP(Functor)>::type>();             \
+            VTable, std::decay<HPX_PP_STRIP_PARENS(F)>::type>();              \
                                                                               \
         template <>                                                           \
         struct get_function_name_declared<                                    \
-            VTable, std::decay<HPX_UTIL_STRIP(Functor)>::type                 \
+            VTable, std::decay<HPX_PP_STRIP_PARENS(F)>::type                  \
         > : std::true_type                                                    \
         {};                                                                   \
     }}}                                                                       \
 /**/
 
-#define HPX_DEFINE_GET_FUNCTION_NAME(VTable, Functor, Name)                   \
+#define HPX_DEFINE_GET_FUNCTION_NAME(VTable, F, Name)                         \
     namespace hpx { namespace util { namespace detail {                       \
         template<> HPX_ALWAYS_EXPORT                                          \
         char const* get_function_name<                                        \
-            VTable, std::decay<HPX_UTIL_STRIP(Functor)>::type>()              \
+            VTable, std::decay<HPX_PP_STRIP_PARENS(F)>::type>()               \
         {                                                                     \
             /*If you encounter this assert while compiling code, that means   \
             that you have a HPX_UTIL_REGISTER_[UNIQUE_]FUNCTION macro         \
@@ -73,10 +72,10 @@ namespace hpx { namespace util { namespace detail
             is defined misses a HPX_UTIL_REGISTER_[UNIQUE_]FUNCTION_DECLARATION*/\
             static_assert(                                                    \
                 get_function_name_declared<                                   \
-                    VTable, std::decay<HPX_UTIL_STRIP(Functor)>::type>::value,\
+                    VTable, std::decay<HPX_PP_STRIP_PARENS(F)>::type>::value, \
                 "HPX_UTIL_REGISTER_[UNIQUE_]FUNCTION_DECLARATION missing for "\
-                BOOST_PP_STRINGIZE(Name));                                    \
-            return BOOST_PP_STRINGIZE(Name);                                  \
+                HPX_PP_STRINGIZE(Name));                                      \
+            return HPX_PP_STRINGIZE(Name);                                    \
         }                                                                     \
     }}}                                                                       \
 /**/

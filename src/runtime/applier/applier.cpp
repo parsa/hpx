@@ -1,5 +1,5 @@
 //  Copyright (c) 2007-2008 Anshul Tandon
-//  Copyright (c) 2007-2016 Hartmut Kaiser
+//  Copyright (c) 2007-2017 Hartmut Kaiser
 //  Copyright (c) 2011      Bryce Lelbach
 //
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -17,13 +17,9 @@
 #include <hpx/runtime/parcelset/parcel.hpp>
 #include <hpx/runtime/threads/threadmanager.hpp>
 #include <hpx/runtime/threads/thread_helpers.hpp>
+#include <hpx/util/assert.hpp>
 #include <hpx/util/register_locks.hpp>
 #include <hpx/util/thread_description.hpp>
-#if defined(HPX_HAVE_SECURITY)
-#include <hpx/components/security/capability.hpp>
-#include <hpx/components/security/certificate.hpp>
-#include <hpx/components/security/signed_type.hpp>
-#endif
 
 #include <cstddef>
 #include <cstdint>
@@ -182,7 +178,7 @@ namespace hpx { namespace applier
         }
 
         util::thread_description d =
-            desc ? desc : util::thread_description(func, "register_thread_nullary");
+            desc ? desc : util::thread_description(func, "register_work_nullary");
 
         threads::thread_init_data data(
             util::bind(util::one_shot(&thread_function_nullary), std::move(func)),
@@ -260,11 +256,8 @@ namespace hpx { namespace applier
     ///////////////////////////////////////////////////////////////////////////
     hpx::util::thread_specific_ptr<applier*, applier::tls_tag> applier::applier_;
 
-    applier::applier(parcelset::parcelhandler &ph, threads::threadmanager_base& tm)
+    applier::applier(parcelset::parcelhandler &ph, threads::threadmanager& tm)
       : parcel_handler_(ph), thread_manager_(tm)
-#if defined(HPX_HAVE_SECURITY)
-      , verify_capabilities_(false)
-#endif
     {}
 
     void applier::initialize(std::uint64_t rts, std::uint64_t mem)
@@ -288,7 +281,7 @@ namespace hpx { namespace applier
         return parcel_handler_;
     }
 
-    threads::threadmanager_base& applier::get_thread_manager()
+    threads::threadmanager& applier::get_thread_manager()
     {
         return thread_manager_;
     }

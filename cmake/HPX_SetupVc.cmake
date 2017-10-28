@@ -34,15 +34,29 @@
 # Vc_AVX_INTRINSICS_BROKEN
 
 find_package(Vc ${Vc_FIND_VERSION} QUIET NO_MODULE PATHS ${Vc_ROOT})
+
 if(NOT Vc_FOUND)
-  hpx_error("Vc was not found while datapar support was requested. Set Vc_ROOT to the installation path of Vc")
+  if(NOT Vc_VERSION_STRING OR (${Vc_VERSION_STRING} VERSION_LESS "1.70.0"))
+    # didn't find any version of Vc
+    hpx_error("Vc was not found while datapar support was requested. Set Vc_ROOT to the installation path of Vc")
+  endif()
+endif()
+
+if(Vc_VERSION_STRING AND (NOT ${Vc_VERSION_STRING} VERSION_LESS "1.70.0"))
+  # found Vc V2
+  if(NOT Vc_INCLUDE_DIR)
+    hpx_error("Vc was not found while datapar support was requested. Set Vc_ROOT to the installation path of Vc")
+  endif()
+  set(HPX_WITH_DATAPAR_VC_NO_LIBRARY On)
 endif()
 
 include_directories(SYSTEM ${Vc_INCLUDE_DIR})
-link_directories(${Vc_LIB_DIR})
+if(NOT HPX_WITH_DATAPAR_VC_NO_LIBRARY)
+  link_directories(${Vc_LIB_DIR})
 
-hpx_library_dir(${Vc_LIB_DIR})
-hpx_libraries(${Vc_LIBRARIES})
+  hpx_library_dir(${Vc_LIB_DIR})
+  hpx_libraries(${Vc_LIBRARIES})
+endif()
 
 foreach(_flag ${Vc_DEFINITIONS})
   # remove leading '-D'
@@ -69,5 +83,5 @@ endif()
 hpx_add_config_define(HPX_HAVE_DATAPAR)
 hpx_add_config_define(HPX_HAVE_DATAPAR_VC)
 
-hpx_info("Found Vc (vectorization): " ${Vc_INCLUDE_DIR})
+hpx_info("Found Vc (vectorization):" ${Vc_INCLUDE_DIR} "- version:" ${Vc_VERSION_STRING})
 

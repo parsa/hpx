@@ -11,6 +11,7 @@
 #include <hpx/hpx_init.hpp>
 #include <hpx/hpx.hpp>
 #include <hpx/runtime/serialization/serialize.hpp>
+#include <hpx/util/unused.hpp>
 
 #include <boost/shared_array.hpp>
 
@@ -259,15 +260,17 @@ struct stepper
         partition const& middle, partition const& right)
     {
         using hpx::dataflow;
-        using hpx::util::unwrapped;
+        using hpx::util::unwrapping;
 
         hpx::shared_future<partition_data> middle_data =
             middle.get_data(partition_server::middle_partition);
 
         hpx::future<partition_data> next_middle = middle_data.then(
-            unwrapped(
+            unwrapping(
                 [middle](partition_data const& m) -> partition_data
                 {
+                    HPX_UNUSED(middle);
+
                     // All local operations are performed once the middle data of
                     // the previous time step becomes available.
                     std::size_t size = m.size();
@@ -281,10 +284,13 @@ struct stepper
 
         return dataflow(
             hpx::launch::async,
-            unwrapped(
+            unwrapping(
                 [left, middle, right](partition_data next, partition_data const& l,
                     partition_data const& m, partition_data const& r) -> partition
                 {
+                    HPX_UNUSED(left);
+                    HPX_UNUSED(right);
+
                     // Calculate the missing boundary elements once the
                     // corresponding data has become available.
                     std::size_t size = m.size();

@@ -24,8 +24,8 @@
 #include <hpx/util/itt_notify.hpp>
 #endif
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <utility>
 
@@ -74,7 +74,8 @@ namespace hpx { namespace actions
         ///               for a \a thread.
         virtual threads::thread_function_type
             get_thread_function(naming::id_type&& target,
-                naming::address_type lva) = 0;
+                naming::address_type lva,
+                naming::address::component_type comptype) = 0;
 
         /// return the id of the locality of the parent thread
         virtual std::uint32_t get_parent_locality_id() const = 0;
@@ -96,7 +97,7 @@ namespace hpx { namespace actions
 
         /// Perform thread initialization
         virtual void schedule_thread(naming::gid_type const& target,
-            naming::address_type lva,
+            naming::address_type lva, naming::component_type comptype,
             std::size_t num_thread) = 0;
 
         /// Return whether the given object was migrated
@@ -114,18 +115,17 @@ namespace hpx { namespace actions
             parcelset::parcelhandler* ph, parcelset::locality const& loc,
             parcelset::parcel const& p) const = 0;
 
-#if defined(HPX_HAVE_SECURITY)
-        /// Return the set of capabilities required to invoke this action
-        virtual components::security::capability get_required_capabilities(
-            naming::address_type lva) const = 0;
-#endif
-
         virtual void load(serialization::input_archive& ar) = 0;
         virtual void save(serialization::output_archive& ar) = 0;
 
         virtual void load_schedule(serialization::input_archive& ar,
             naming::gid_type&& target, naming::address_type lva,
-            std::size_t num_thread, bool& deferred_schedule) = 0;
+            naming::component_type comptype, std::size_t num_thread,
+            bool& deferred_schedule) = 0;
+
+        /// The function \a get_serialization_id returns the id which has been
+        /// associated with this action (mainly used for serialization purposes).
+        virtual std::uint32_t get_action_id() const = 0;
 
 #if HPX_HAVE_ITTNOTIFY != 0 && !defined(HPX_HAVE_APEX)
         /// The function \a get_action_name_itt returns the name of this action
