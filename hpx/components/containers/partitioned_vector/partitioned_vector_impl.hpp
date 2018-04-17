@@ -74,7 +74,6 @@ namespace hpx
             std::back_inserter(partitions_));
 
         std::uint32_t this_locality = get_locality_id();
-        std::vector<future<void>> ptrs;
 
         typedef typename partitions_vector_type::const_iterator const_iterator;
 
@@ -84,13 +83,10 @@ namespace hpx
         {
             if (it->locality_id_ == this_locality)
             {
-                ptrs.push_back(
-                    get_ptr<partitioned_vector_partition_server>(it->partition_)
-                        .then(util::bind_front(&partitioned_vector::get_ptr_helper, l,
-                            std::ref(partitions_))));
+                get_ptr_helper(l, partitions_,
+                    get_ptr<partitioned_vector_partition_server>(it->partition_));
             }
         }
-        wait_all(ptrs);
 
         partition_size_ = get_partition_size();
         this->base_type::reset(std::move(id));
@@ -322,9 +318,9 @@ namespace hpx
     HPX_PARTITIONED_VECTOR_SPECIALIZATION_EXPORT void
     partitioned_vector<T, Data>::get_ptr_helper(std::size_t loc,
         partitions_vector_type& partitions,
-        future<std::shared_ptr<partitioned_vector_partition_server>>&& f)
+        std::shared_ptr<partitioned_vector_partition_server>&& ptr)
     {
-        partitions[loc].local_data_ = f.get();
+        partitions[loc].local_data_ = std::move(ptr);
     }
 
     template <typename T, typename Data /*= std::vector<T> */>
@@ -364,10 +360,8 @@ namespace hpx
 
                 if (locality == this_locality)
                 {
-                    ptrs.push_back(
-                        get_ptr<partitioned_vector_partition_server>(id).then(
-                            util::bind_front(&partitioned_vector::get_ptr_helper,
-                                l, std::ref(partitions_))));
+                    get_ptr_helper(l, partitions_,
+                        get_ptr<partitioned_vector_partition_server>(id));
                 }
                 ++l;
 
@@ -454,11 +448,8 @@ namespace hpx
 
             if (locality == this_locality)
             {
-                ptrs.push_back(
-                    get_ptr<partitioned_vector_partition_server>(
-                        partitions[i].partition_)
-                        .then(util::bind_front(&partitioned_vector::get_ptr_helper, i,
-                            std::ref(partitions))));
+                get_ptr_helper(i, partitions,
+                    get_ptr<partitioned_vector_partition_server>(partitions[i].partition_));
             }
         }
 

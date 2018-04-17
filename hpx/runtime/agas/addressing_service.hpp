@@ -894,15 +894,6 @@ public:
         std::uint64_t msb
         );
 
-    // same, but bulk operation
-//     bool is_local_address(
-//         naming::gid_type const* gids
-//       , naming::address* addrs
-//       , std::size_t size
-//       , boost::dynamic_bitset<>& locals
-//       , error_code& ec = throws
-//         );
-
     /// \brief Resolve a given global address (\a id) to its associated local
     ///        address.
     ///
@@ -932,64 +923,22 @@ public:
     ///                   throw but returns the result code using the
     ///                   parameter \a ec. Otherwise it throws an instance
     ///                   of hpx#exception.
-    bool resolve_local(
-        naming::gid_type const& id
-      , naming::address& addr
-      , error_code& ec = throws
+    naming::address resolve(
+        naming::id_type const& id
         )
     {
+        error_code ec = throws;
+        naming::gid_type gid = id.get_gid();
+        naming::address addr;
         // Try the cache
         if (caching_)
         {
-            if (resolve_cached(id, addr, ec))
-                return true;
-
-            if (ec)
-                return false;
+            if (resolve_cached(gid, addr, ec))
+                return addr;
         }
 
-        return resolve_full_local(id, addr, ec);
-    }
-
-    bool resolve_local(
-        naming::id_type const& id
-      , naming::address& addr
-      , error_code& ec = throws
-        )
-    {
-        return resolve_local(id.get_gid(), addr, ec);
-    }
-
-    naming::address resolve_local(
-        naming::gid_type const& id
-      , error_code& ec = throws
-        )
-    {
-        naming::address addr;
-        resolve_local(id, addr, ec);
+        resolve_full_local(gid, addr, ec);
         return addr;
-    }
-
-    naming::address resolve_local(
-        naming::id_type const& id
-      , error_code& ec = throws
-        )
-    {
-        naming::address addr;
-        resolve_local(id.get_gid(), addr, ec);
-        return addr;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    hpx::future<naming::address> resolve_async(
-        naming::gid_type const& id
-        );
-
-    hpx::future<naming::address> resolve_async(
-        naming::id_type const& id
-        )
-    {
-        return resolve_async(id.get_gid());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1031,17 +980,6 @@ public:
         naming::address addr;
         resolve_full_local(id.get_gid(), addr, ec);
         return addr;
-    }
-
-    hpx::future<naming::address> resolve_full_async(
-        naming::gid_type const& id
-        );
-
-    hpx::future<naming::address> resolve_full_async(
-        naming::id_type const& id
-        )
-    {
-        return resolve_full_async(id.get_gid());
     }
 
     bool resolve_cached(

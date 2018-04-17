@@ -358,8 +358,7 @@ namespace hpx
         partitioned_vector_partition<T, Data>::get_ptr() const
     {
         error_code ec(lightweight);
-        return hpx::get_ptr<server::partitioned_vector<T, Data>>(this->get_id())
-            .get(ec);
+        return hpx::get_ptr<server::partitioned_vector<T, Data>>(this->get_id());
     }
 
     template <typename T, typename Data /*= std::vector<T> */>

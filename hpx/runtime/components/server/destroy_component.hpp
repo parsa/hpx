@@ -64,8 +64,7 @@ namespace hpx { namespace components { namespace server
     template <typename Component>
     void destroy(naming::gid_type const& gid)
     {
-
-        naming::address addr;
+        naming::address addr = ags;
         if (!naming::get_agas_client().resolve_local(gid, addr))
         {
             std::ostringstream strm;

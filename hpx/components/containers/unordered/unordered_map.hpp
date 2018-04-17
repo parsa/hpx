@@ -347,9 +347,9 @@ namespace hpx
         ///////////////////////////////////////////////////////////////////////
         static void get_ptr_helper(std::size_t loc,
             partitions_vector_type& partitions,
-            future<std::shared_ptr<partition_unordered_map_server> > && f)
+            std::shared_ptr<partition_unordered_map_server> && ptr)
         {
-            partitions[loc].local_data_ = f.get();
+            partitions[loc].local_data_ = std::move(ptr);
         }
 
         /// \cond NOINTERNAL
@@ -373,19 +373,12 @@ namespace hpx
                     partitions_.push_back(partition_data(id, locality));
                     if (locality == this_locality)
                     {
-                        ptrs.push_back(
-                            get_ptr<partition_unordered_map_server>(id).then(
-                                util::bind_front(&unordered_map::get_ptr_helper,
-                                    l, std::ref(partitions_)
-                                )
-                            )
-                        );
+                        get_ptr_helper(l, partitions_,
+                            get_ptr<partition_unordered_map_server>(id));
                     }
                     ++l;
                 }
             }
-
-            wait_all(ptrs);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -443,7 +436,6 @@ namespace hpx
             wait_all(objs);
 
             std::uint32_t this_locality = get_locality_id();
-            std::vector<future<void> > ptrs;
 
             partitions_vector_type partitions;
             partitions.reserve(rhs.partitions_.size());
@@ -455,14 +447,11 @@ namespace hpx
 
                 if (locality == this_locality)
                 {
-                    ptrs.push_back(get_ptr<partition_unordered_map_server>(
-                        partitions[i].partition_.get()).then(
-                            util::bind_front(&unordered_map::get_ptr_helper,
-                                i, std::ref(partitions))));
+                    get_ptr_helper(i, partitions,
+                        get_ptr<partition_unordered_map_server>(
+                            partitions[i].partition_.get()));
                 }
             }
-
-            wait_all(ptrs);
 
             std::swap(partitions_, partitions);
         }

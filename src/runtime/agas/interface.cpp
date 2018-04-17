@@ -231,22 +231,12 @@ bool is_local_lva_encoded_address(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-hpx::future<naming::address> resolve(
+naming::address resolve(
     naming::id_type const& id
     )
 {
     naming::resolver_client& agas_ = naming::get_agas_client();
-    return agas_.resolve_async(id);
-}
-
-naming::address resolve(
-    launch::sync_policy
-  , naming::id_type const& id
-  , error_code& ec
-    )
-{
-    naming::resolver_client& agas_ = naming::get_agas_client();
-    return agas_.resolve_async(id).get(ec);
+    return agas_.resolve(id);
 }
 
 hpx::future<bool> bind(

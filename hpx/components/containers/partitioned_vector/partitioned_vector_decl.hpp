@@ -349,7 +349,7 @@ namespace hpx
 
         static void get_ptr_helper(std::size_t loc,
             partitions_vector_type& partitions,
-            future<std::shared_ptr<partitioned_vector_partition_server> > && f);
+            std::shared_ptr<partitioned_vector_partition_server> && ptr);
 
         // This function is called when we are creating the vector. It
         // initializes the partitions based on the give parameters.

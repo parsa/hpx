@@ -4,6 +4,7 @@
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <hpx/hpx_init.hpp>
+#include <hpx/runtime/agas/addressing_service.hpp>
 #include <hpx/include/iostreams.hpp>
 #include <hpx/util/lightweight_test.hpp>
 
@@ -44,11 +45,10 @@ int hpx_main(
         std::uint64_t b_lva = b.get_lva();
 
         // Resolve a_gid.
-        address addr = hpx::agas::resolve(a_id).get();
+        address addr = hpx::agas::resolve(a_id);
 
         ///////////////////////////////////////////////////////////////////////
         HPX_TEST_EQ(addr.address_, a.get_lva());
-        HPX_SANITY_EQ(hpx::agas::resolve(a_id).get().address_, a.get_lva());
 
         ///////////////////////////////////////////////////////////////////////
         // Change a's GID to point to b.
@@ -63,7 +63,7 @@ int hpx_main(
 
         ///////////////////////////////////////////////////////////////////////
         HPX_TEST_EQ(b_lva, a.get_lva());
-        HPX_SANITY_EQ(hpx::agas::resolve(a_id).get().address_, a.get_lva());
+        HPX_SANITY_EQ(hpx::agas::resolve(a_id).address_, a.get_lva());
 
         ///////////////////////////////////////////////////////////////////////
         // Now we restore the original bindings to prevent a double free.
@@ -76,8 +76,8 @@ int hpx_main(
         get_agas_client().update_cache_entry(a_gid, addr);
 
         ///////////////////////////////////////////////////////////////////////
-        HPX_TEST_EQ(hpx::agas::resolve(a_id).get().address_, a_lva);
-        HPX_SANITY_EQ(hpx::agas::resolve(a_id).get().address_, a.get_lva());
+        HPX_TEST_EQ(hpx::agas::resolve(a_id).address_, a_lva);
+        HPX_SANITY_EQ(hpx::agas::resolve(a_id).address_, a.get_lva());
     }
 
     finalize();

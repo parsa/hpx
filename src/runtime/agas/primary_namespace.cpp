@@ -59,11 +59,6 @@ HPX_REGISTER_ACTION_ID(
     hpx::actions::primary_namespace_increment_credit_action_id)
 
 HPX_REGISTER_ACTION_ID(
-    primary_namespace::resolve_gid_action,
-    primary_namespace_resolve_gid_action,
-    hpx::actions::primary_namespace_resolve_gid_action_id)
-
-HPX_REGISTER_ACTION_ID(
     primary_namespace::colocate_action,
     primary_namespace_colocate_action,
     hpx::actions::primary_namespace_colocate_action_id)
@@ -235,12 +230,8 @@ namespace hpx { namespace agas {
     {
         naming::id_type dest = naming::id_type(get_service_instance(id),
             naming::id_type::unmanaged);
-        if (naming::get_locality_from_gid(dest.get_gid()) == hpx::get_locality())
-        {
-            return hpx::make_ready_future(server_->resolve_gid(id));
-        }
-        server::primary_namespace::resolve_gid_action action;
-        return hpx::async(action, std::move(dest), id);
+        HPX_ASSERT(dest.get_gid() == hpx::get_locality());
+        return hpx::make_ready_future(server_->resolve_gid(id));
     }
 
     hpx::future<id_type> primary_namespace::colocate(naming::gid_type id)

@@ -1159,37 +1159,6 @@ bool addressing_service::resolve_cached(
     return false;
 } // }}}
 
-hpx::future<naming::address> addressing_service::resolve_async(
-    naming::gid_type const& gid
-    )
-{
-    if (!gid)
-    {
-        HPX_THROW_EXCEPTION(bad_parameter,
-            "addressing_service::resolve_async",
-            "invalid reference id");
-        return make_ready_future(naming::address());
-    }
-
-    // Try the cache.
-    if (caching_)
-    {
-        naming::address addr;
-        error_code ec;
-        if (resolve_cached(gid, addr, ec))
-            return make_ready_future(addr);
-
-        if (ec)
-        {
-            return hpx::make_exceptional_future<naming::address>(
-                hpx::detail::access_exception(ec));
-        }
-    }
-
-    // now try the AGAS service
-    return resolve_full_async(gid);
-}
-
 hpx::future<naming::id_type> addressing_service::get_colocation_id_async(
     naming::id_type const& id
     )
@@ -1249,29 +1218,6 @@ naming::address addressing_service::resolve_full_postproc(
     }
 
     return addr;
-}
-
-hpx::future<naming::address> addressing_service::resolve_full_async(
-    naming::gid_type const& gid
-    )
-{
-    if (!gid)
-    {
-        HPX_THROW_EXCEPTION(bad_parameter,
-            "addressing_service::resolve_full_async",
-            "invalid reference id");
-        return make_ready_future(naming::address());
-    }
-
-    // ask server
-    future<primary_namespace::resolved_type> f =
-        primary_ns_.resolve_full(gid);
-
-    using util::placeholders::_1;
-    return f.then(util::bind(
-            util::one_shot(&addressing_service::resolve_full_postproc),
-            this, _1, gid
-        ));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

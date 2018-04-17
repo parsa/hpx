@@ -419,13 +419,6 @@ HPX_REGISTER_ACTION_DECLARATION(
     primary_namespace_increment_credit_action)
 
 HPX_ACTION_USES_MEDIUM_STACK(
-    hpx::agas::server::primary_namespace::resolve_gid_action)
-
-HPX_REGISTER_ACTION_DECLARATION(
-    hpx::agas::server::primary_namespace::resolve_gid_action,
-    primary_namespace_resolve_gid_action)
-
-HPX_ACTION_USES_MEDIUM_STACK(
     hpx::agas::server::primary_namespace::colocate_action)
 
 HPX_REGISTER_ACTION_DECLARATION(

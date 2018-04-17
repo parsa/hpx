@@ -50,10 +50,8 @@ bool test_get_ptr1(hpx::id_type id)
     HPX_TEST_NEQ(hpx::naming::invalid_id, t.get_id());
 
     try {
-        hpx::future<std::shared_ptr<test_server> > f =
+        std::shared_ptr<test_server> ptr =
             hpx::get_ptr<test_server>(t.get_id());
-
-        std::shared_ptr<test_server> ptr = f.get();
 
         HPX_TEST_EQ(reinterpret_cast<test_server*>(t.check_ptr()), ptr.get());
         return true;
@@ -70,17 +68,19 @@ bool test_get_ptr2(hpx::id_type id)
     test_client t = test_client::create(id);
     HPX_TEST_NEQ(hpx::naming::invalid_id, t.get_id());
 
-    hpx::future<std::shared_ptr<test_server> > f =
-        hpx::get_ptr<test_server>(t.get_id());
-
-    f.wait();
-    bool has_exception = f.has_exception();
-
-    hpx::error_code ec;
-    std::shared_ptr<test_server> ptr = f.get(ec);
+    std::shared_ptr<test_server> ptr;
+    bool has_exception = false;
+    try
+    {
+        ptr = hpx::get_ptr(t);
+    }
+    catch (...)
+    {
+        has_exception = true;
+    }
 
     // Intel 13 has trouble to generate correct code for if(ec) { ... }
-    if (ec || !ptr.get())
+    if (!ptr.get())
     {
         HPX_TEST(has_exception);
         return false;
@@ -98,8 +98,7 @@ bool test_get_ptr3(hpx::id_type id)
     HPX_TEST_NEQ(hpx::naming::invalid_id, t.get_id());
 
     try {
-        hpx::future<std::shared_ptr<test_server> > f = hpx::get_ptr(t);
-        std::shared_ptr<test_server> ptr = f.get();
+        std::shared_ptr<test_server> ptr = hpx::get_ptr(t);
 
         HPX_TEST_EQ(reinterpret_cast<test_server*>(t.check_ptr()), ptr.get());
         return true;
@@ -116,16 +115,18 @@ bool test_get_ptr4(hpx::id_type id)
     test_client t = test_client::create(id);
     HPX_TEST_NEQ(hpx::naming::invalid_id, t.get_id());
 
-    hpx::future<std::shared_ptr<test_server> > f = hpx::get_ptr(t);
-    f.wait();
+    std::shared_ptr<test_server> ptr;
+    bool has_exception = false;
+    try
+    {
+        ptr = hpx::get_ptr(t);
+    }
+    catch (...)
+    {
+        has_exception = true;
+    }
 
-    bool has_exception = f.has_exception();
-
-    hpx::error_code ec;
-    std::shared_ptr<test_server> ptr = f.get(ec);
-
-    // Intel 13 has trouble to generate correct code for if(ec) { ... }
-    if (ec || !ptr.get())
+    if (!ptr.get())
     {
         HPX_TEST(has_exception);
         return false;

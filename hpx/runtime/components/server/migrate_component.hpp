@@ -268,44 +268,33 @@ namespace hpx { namespace components { namespace server
                     "does not support migration"));
         }
 
-        // retrieve pointer to object (must be local)
-        return hpx::get_ptr<Component>(to_migrate)
+        future<void> trigger_migration =
+            // retrieve pointer to object (must be local) and mark it as migrated.
+            // Delay the start of the migration operation until no
+            // more actions (threads) are pending or currently
+            // running for the given object (until the object is
+            // unpinned).
+            // Unpin the object, will trigger migration if this is
+            // the only pin-count.
+            hpx::get_ptr<Component>(to_migrate)->mark_as_migrated(to_migrate);
+
+        // Once the migration is possible (object is not pinned
+        // anymore trigger the necessary actions)
+        return trigger_migration
             .then(
-                [=](future<std::shared_ptr<Component> > && f) -> future<id_type>
+                launch::async,  // run on separate thread
+                [=](future<void> && f) -> future<id_type>
                 {
-                    future<void> trigger_migration;
+                    f.get();        // rethrow exceptions
 
-                    {
-                        std::shared_ptr<Component> ptr = f.get();
+                    // now trigger 2nd step of migration
+                    typedef trigger_migrate_component_action<
+                            Component, DistPolicy
+                        > action_type;
 
-                        // Delay the start of the migration operation until no
-                        // more actions (threads) are pending or currently
-                        // running for the given object (until the object is
-                        // unpinned).
-                        trigger_migration = ptr->mark_as_migrated(to_migrate);
-
-                        // Unpin the object, will trigger migration if this is
-                        // the only pin-count.
-                    }
-
-                    // Once the migration is possible (object is not pinned
-                    // anymore trigger the necessary actions)
-                    return trigger_migration
-                        .then(
-                            launch::async,  // run on separate thread
-                            [=](future<void> && f) -> future<id_type>
-                            {
-                                f.get();        // rethrow exceptions
-
-                                // now trigger 2nd step of migration
-                                typedef trigger_migrate_component_action<
-                                        Component, DistPolicy
-                                    > action_type;
-
-                                return async<action_type>(
-                                    naming::get_locality_from_id(to_migrate),
-                                    to_migrate, policy);
-                            });
+                    return async<action_type>(
+                        naming::get_locality_from_id(to_migrate),
+                        to_migrate, policy);
                 });
     }
 

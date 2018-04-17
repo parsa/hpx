@@ -288,26 +288,9 @@ inline bool is_local_lva_encoded_address(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-HPX_API_EXPORT hpx::future<naming::address> resolve(
-    naming::id_type const& id
-    );
-
 HPX_API_EXPORT naming::address resolve(
-    launch::sync_policy
-  , naming::id_type const& id
-  , error_code& ec = throws
-    );
-
-#if defined(HPX_HAVE_ASYNC_FUNCTION_COMPATIBILITY)
-HPX_DEPRECATED(HPX_DEPRECATED_MSG)
-inline naming::address resolve_sync(
     naming::id_type const& id
-  , error_code& ec = throws
-    )
-{
-    return resolve(launch::sync, id, ec);
-}
-#endif
+    );
 
 HPX_API_EXPORT hpx::future<bool> bind(
     naming::gid_type const& gid

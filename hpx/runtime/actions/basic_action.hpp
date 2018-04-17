@@ -668,7 +668,6 @@ namespace hpx { namespace actions
         primary_namespace_decrement_credit_action_id,
         primary_namespace_end_migration_action_id,
         primary_namespace_increment_credit_action_id,
-        primary_namespace_resolve_gid_action_id,
         primary_namespace_route_action_id,
         primary_namespace_unbind_gid_action_id,
         primary_namespace_statistics_counter_action_id,
