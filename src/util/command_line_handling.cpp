@@ -13,6 +13,7 @@
 #include <hpx/runtime/threads/thread.hpp>
 #include <hpx/runtime/threads/threadmanager.hpp>
 #include <hpx/runtime/threads/topology.hpp>
+#include <hpx/util/assert.hpp>
 #include <hpx/util/asio_util.hpp>
 #include <hpx/util/batch_environment.hpp>
 #include <hpx/util/debugging.hpp>
@@ -1201,12 +1202,57 @@ namespace hpx { namespace util
     }
 
     ///////////////////////////////////////////////////////////////////////////
+    // separate command line arguments from configuration settings
+    std::vector<std::string> command_line_handling::preprocess_config_settings(
+        int argc, char** argv)
+    {
+        std::vector<std::string> options;
+        options.reserve(argc + ini_config_.size());
+
+        // add executable name first
+        HPX_ASSERT(argc != 0);
+        options.emplace_back(argv[0]);
+
+        // extract all command line arguments from configuration settings and
+        // remove them from this list
+        auto end = ini_config_.end();
+        auto it = ini_config_.begin();
+        while(it != end)
+        {
+            if ((*it).find("--hpx:") == 0)
+            {
+                auto current = it;
+                ++it;
+
+                // command line option
+                options.push_back(*current);
+                ini_config_.erase(current);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+
+        // now append all original command line options
+        for (int i = 1; i != argc; ++i)
+        {
+            options.emplace_back(argv[i]);
+        }
+
+        return options;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
     int command_line_handling::call(
         boost::program_options::options_description const& desc_cmdline,
         int argc, char** argv)
     {
         // set the flag signaling that command line parsing has been done
         cmd_line_parsed_ = true;
+
+        // separate command line arguments from configuration settings
+        std::vector<std::string> args = preprocess_config_settings(argc, argv);
 
         util::manage_config cfgmap(ini_config_);
 
@@ -1230,8 +1276,8 @@ namespace hpx { namespace util
             // creating a separate instance just for the preliminary
             // command line handling.
             boost::program_options::variables_map prevm;
-            if (!util::parse_commandline(rtcfg_, desc_cmdline, argc,
-                    argv, prevm, std::size_t(-1), error_mode,
+            if (!util::parse_commandline(rtcfg_, desc_cmdline, args,
+                    prevm, std::size_t(-1), error_mode,
                     rtcfg_.mode_))
             {
                 return -1;
@@ -1298,7 +1344,7 @@ namespace hpx { namespace util
         std::vector<std::string> unregistered_options;
 
         if (!util::parse_commandline(rtcfg_, desc_cmdline,
-                argc, argv, vm_, node_, error_mode, rtcfg_.mode_,
+                args, vm_, node_, error_mode, rtcfg_.mode_,
                 &help, &unregistered_options))
         {
             return -1;
