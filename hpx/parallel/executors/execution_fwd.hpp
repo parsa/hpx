@@ -73,73 +73,6 @@ namespace hpx { namespace parallel { namespace execution
             }
         };
 
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        // forward declare customization point implementations
-        template <>
-        struct customization_point<post_tag>
-        {
-            template <typename Executor, typename F, typename ... Ts>
-            HPX_FORCEINLINE
-            auto operator()(Executor && exec, F && f, Ts &&... ts) const;
-        };
-
-        template <>
-        struct customization_point<sync_execute_tag>
-        {
-            template <typename Executor, typename F, typename ... Ts>
-            HPX_FORCEINLINE
-            auto operator()(Executor && exec, F && f, Ts &&... ts) const;
-        };
-
-        template <>
-        struct customization_point<async_execute_tag>
-        {
-            template <typename Executor, typename F, typename ... Ts>
-            HPX_FORCEINLINE
-            auto operator()(Executor && exec, F && f, Ts &&... ts) const;
-        };
-
-        template <>
-        struct customization_point<then_execute_tag>
-        {
-            template <typename Executor, typename F, typename Future,
-                typename ... Ts>
-            HPX_FORCEINLINE
-            auto operator()(Executor && exec, F && f, Future&& predecessor,
-                Ts &&... ts) const;
-        };
-
-        template <>
-        struct customization_point<bulk_sync_execute_tag>
-        {
-            template <typename Executor, typename F, typename Shape,
-                typename ... Ts>
-            HPX_FORCEINLINE
-            auto operator()(Executor && exec, F && f, Shape const& shape,
-                Ts &&... ts) const;
-        };
-
-        template <>
-        struct customization_point<bulk_async_execute_tag>
-        {
-            template <typename Executor, typename F, typename Shape,
-                typename ... Ts>
-            HPX_FORCEINLINE
-            auto operator()(Executor && exec, F && f, Shape const& shape,
-                Ts &&... ts) const;
-        };
-
-        template <>
-        struct customization_point<bulk_then_execute_tag>
-        {
-            template <typename Executor, typename F, typename Shape,
-                typename Future, typename ... Ts>
-            HPX_FORCEINLINE
-            auto operator()(Executor && exec, F && f, Shape const& shape,
-                Future&& predecessor, Ts &&... ts) const;
-        };
-#endif
-
         // Helper facility to avoid ODR violations
         template <typename T>
         struct static_const
@@ -315,15 +248,6 @@ namespace hpx { namespace parallel { namespace execution
 
         ///////////////////////////////////////////////////////////////////////
         // async_execute customization point
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Executor, typename F, typename... Ts>
-        HPX_FORCEINLINE auto customization_point<async_execute_tag>::
-        operator()(Executor&& exec, F&& f, Ts&&... ts) const
-        {
-            return async_execute(std::forward<Executor>(exec),
-                std::forward<F>(f), std::forward<Ts>(ts)...);
-        }
-#else
         template <>
         struct customization_point<async_execute_tag>
         {
@@ -338,19 +262,9 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<F>(f), std::forward<Ts>(ts)...);
             }
         };
-#endif
 
         ///////////////////////////////////////////////////////////////////////
         // sync_execute customization point
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Executor, typename F, typename... Ts>
-        HPX_FORCEINLINE auto customization_point<sync_execute_tag>::
-        operator()(Executor&& exec, F&& f, Ts&&... ts) const
-        {
-            return sync_execute(std::forward<Executor>(exec),
-                std::forward<F>(f), std::forward<Ts>(ts)...);
-        }
-#else
         template <>
         struct customization_point<sync_execute_tag>
         {
@@ -365,22 +279,9 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<F>(f), std::forward<Ts>(ts)...);
             }
         };
-#endif
 
         ///////////////////////////////////////////////////////////////////////
         // then_execute customization point
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Executor, typename F, typename Future,
-            typename... Ts>
-        HPX_FORCEINLINE auto customization_point<then_execute_tag>::
-        operator()(
-            Executor&& exec, F&& f, Future&& predecessor, Ts&&... ts) const
-        {
-            return then_execute(std::forward<Executor>(exec),
-                std::forward<F>(f), std::forward<Future>(predecessor),
-                std::forward<Ts>(ts)...);
-        }
-#else
         template <>
         struct customization_point<then_execute_tag>
         {
@@ -399,19 +300,9 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<Ts>(ts)...);
             }
         };
-#endif
 
         ///////////////////////////////////////////////////////////////////////
         // post customization point
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Executor, typename F, typename... Ts>
-        HPX_FORCEINLINE auto customization_point<post_tag>::operator()(
-            Executor&& exec, F&& f, Ts&&... ts) const
-        {
-            return post(std::forward<Executor>(exec), std::forward<F>(f),
-                std::forward<Ts>(ts)...);
-        }
-#else
         template <>
         struct customization_point<post_tag>
         {
@@ -426,21 +317,9 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<F>(f), std::forward<Ts>(ts)...);
             }
         };
-#endif
 
         ///////////////////////////////////////////////////////////////////////
         // bulk_async_execute customization point
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Executor, typename F, typename Shape,
-            typename... Ts>
-        HPX_FORCEINLINE auto customization_point<bulk_async_execute_tag>::
-        operator()(
-            Executor&& exec, F&& f, Shape const& shape, Ts&&... ts) const
-        {
-            return bulk_async_execute(std::forward<Executor>(exec),
-                std::forward<F>(f), shape, std::forward<Ts>(ts)...);
-        }
-#else
         template <>
         struct customization_point<bulk_async_execute_tag>
         {
@@ -456,21 +335,9 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<F>(f), shape, std::forward<Ts>(ts)...);
             }
         };
-#endif
 
         ///////////////////////////////////////////////////////////////////////
         // bulk_sync_execute customization point
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Executor, typename F, typename Shape,
-            typename... Ts>
-        HPX_FORCEINLINE auto customization_point<bulk_sync_execute_tag>::
-        operator()(
-            Executor&& exec, F&& f, Shape const& shape, Ts&&... ts) const
-        {
-            return bulk_sync_execute(std::forward<Executor>(exec),
-                std::forward<F>(f), shape, std::forward<Ts>(ts)...);
-        }
-#else
         template <>
         struct customization_point<bulk_sync_execute_tag>
         {
@@ -486,22 +353,9 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<F>(f), shape, std::forward<Ts>(ts)...);
             }
         };
-#endif
 
         ///////////////////////////////////////////////////////////////////////
         // bulk_then_execute customization point
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Executor, typename F, typename Shape,
-            typename Future, typename... Ts>
-        HPX_FORCEINLINE auto customization_point<bulk_then_execute_tag>::
-        operator()(Executor&& exec, F&& f, Shape const& shape,
-            Future&& predecessor, Ts&&... ts) const
-        {
-            return bulk_then_execute(std::forward<Executor>(exec),
-                std::forward<F>(f), shape, std::forward<Future>(predecessor),
-                std::forward<Ts>(ts)...);
-        }
-#else
         template <>
         struct customization_point<bulk_then_execute_tag>
         {
@@ -519,7 +373,6 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<Ts>(ts)...);
             }
         };
-#endif
         /// \endcond
     }
 

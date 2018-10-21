@@ -29,59 +29,6 @@ namespace hpx { namespace parallel { namespace execution
         struct count_processing_units_tag {};
         struct mark_begin_execution_tag {};
         struct mark_end_execution_tag {};
-
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        // forward declare customization point implementations
-        template <>
-        struct customization_point<get_chunk_size_tag>
-        {
-            template <typename Parameters, typename Executor, typename F>
-            HPX_FORCEINLINE auto operator()(Parameters&& params,
-                Executor&& exec, F&& f, std::size_t cores,
-                std::size_t num_tasks) const;
-        };
-
-        template <>
-        struct customization_point<maximal_number_of_chunks_tag>
-        {
-            template <typename Parameters, typename Executor>
-            HPX_FORCEINLINE auto operator()(Parameters&& params,
-                Executor&& exec, std::size_t cores,
-                std::size_t num_tasks) const;
-        };
-
-        template <>
-        struct customization_point<reset_thread_distribution_tag>
-        {
-            template <typename Parameters, typename Executor>
-            HPX_FORCEINLINE auto operator()(
-                Parameters&& params, Executor&& exec) const;
-        };
-
-        template <>
-        struct customization_point<count_processing_units_tag>
-        {
-            template <typename Parameters, typename Executor>
-            HPX_FORCEINLINE auto operator()(Parameters&& params,
-                Executor&& exec) const;
-        };
-
-        template <>
-        struct customization_point<mark_begin_execution_tag>
-        {
-            template <typename Parameters, typename Executor>
-            HPX_FORCEINLINE auto operator()(Parameters&& params,
-                Executor&& exec) const;
-        };
-
-        template <>
-        struct customization_point<mark_end_execution_tag>
-        {
-            template <typename Parameters, typename Executor>
-            HPX_FORCEINLINE auto operator()(Parameters&& params,
-                Executor&& exec) const;
-        };
-#endif
         /// \endcond
     }
 
@@ -134,17 +81,6 @@ namespace hpx { namespace parallel { namespace execution
                     num_tasks);
         }
 
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Parameters, typename Executor, typename F>
-        HPX_FORCEINLINE auto customization_point<get_chunk_size_tag>::
-        operator()(Parameters&& params, Executor&& exec, F&& f,
-            std::size_t cores, std::size_t num_tasks) const
-        {
-            return get_chunk_size(std::forward<Parameters>(params),
-                std::forward<Executor>(exec), std::forward<F>(f), cores,
-                num_tasks);
-        }
-#else
         template <>
         struct customization_point<get_chunk_size_tag>
         {
@@ -162,7 +98,6 @@ namespace hpx { namespace parallel { namespace execution
                     num_tasks);
             }
         };
-#endif
 
         ///////////////////////////////////////////////////////////////////////
         // maximal_number_of_chunks dispatch point
@@ -182,16 +117,6 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<Executor>(exec), cores, num_tasks);
         }
 
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Parameters, typename Executor>
-        HPX_FORCEINLINE auto customization_point<maximal_number_of_chunks_tag>::
-        operator()(Parameters&& params, Executor&& exec, std::size_t cores,
-            std::size_t num_tasks) const
-        {
-            return maximal_number_of_chunks(std::forward<Parameters>(params),
-                std::forward<Executor>(exec), cores, num_tasks);
-        }
-#else
         template <>
         struct customization_point<maximal_number_of_chunks_tag>
         {
@@ -209,7 +134,6 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<Executor>(exec), cores, num_tasks);
             }
         };
-#endif
 
         ///////////////////////////////////////////////////////////////////////
         // reset_thread_distribution dispatch point
@@ -229,15 +153,6 @@ namespace hpx { namespace parallel { namespace execution
                         std::forward<Executor>(exec));
         }
 
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Parameters, typename Executor>
-        HPX_FORCEINLINE auto customization_point<reset_thread_distribution_tag>::
-        operator()(Parameters&& params, Executor&& exec) const
-        {
-            return reset_thread_distribution(std::forward<Parameters>(params),
-                std::forward<Executor>(exec));
-        }
-#else
         template <>
         struct customization_point<reset_thread_distribution_tag>
         {
@@ -254,7 +169,6 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<Executor>(exec));
             }
         };
-#endif
 
         ///////////////////////////////////////////////////////////////////////
         // count_processing_units dispatch point
@@ -275,15 +189,6 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<Executor>(exec));
         }
 
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Parameters, typename Executor>
-        HPX_FORCEINLINE auto customization_point<count_processing_units_tag>::
-        operator()(Parameters&& params, Executor&& exec) const
-        {
-            return count_processing_units(std::forward<Parameters>(params),
-                std::forward<Executor>(exec));
-        }
-#else
         template <>
         struct customization_point<count_processing_units_tag>
         {
@@ -300,7 +205,6 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<Executor>(exec));
             }
         };
-#endif
 
         ///////////////////////////////////////////////////////////////////////
         // mark_begin_execution dispatch point
@@ -320,15 +224,6 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<Executor>(exec));
         }
 
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Parameters, typename Executor>
-        HPX_FORCEINLINE auto customization_point<mark_begin_execution_tag>::
-        operator()(Parameters&& params, Executor&& exec) const
-        {
-            return mark_begin_execution(std::forward<Parameters>(params),
-                std::forward<Executor>(exec));
-        }
-#else
         template <>
         struct customization_point<mark_begin_execution_tag>
         {
@@ -343,7 +238,6 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<Executor>(exec));
             }
         };
-#endif
 
         ///////////////////////////////////////////////////////////////////////
         // mark_end_execution dispatch point
@@ -363,15 +257,6 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<Executor>(exec));
         }
 
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Parameters, typename Executor>
-        HPX_FORCEINLINE auto customization_point<mark_end_execution_tag>::
-        operator()(Parameters&& params, Executor&& exec) const
-        {
-            return mark_end_execution(std::forward<Parameters>(params),
-                std::forward<Executor>(exec));
-        }
-#else
         template <>
         struct customization_point<mark_end_execution_tag>
         {
@@ -386,7 +271,6 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<Executor>(exec));
             }
         };
-#endif
 
         /// \endcond
     }

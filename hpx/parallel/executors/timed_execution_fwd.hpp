@@ -97,69 +97,6 @@ namespace hpx { namespace parallel { namespace execution
         struct async_execute_at_tag {};
         struct async_execute_after_tag {};
 
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        // forward declare customization point implementations
-        template <>
-        struct customization_point<post_at_tag>
-        {
-            template <typename Executor, typename F, typename ... Ts>
-            HPX_FORCEINLINE
-            auto operator()(Executor && exec,
-                hpx::util::steady_time_point const& abs_time,
-                F && f, Ts &&... ts) const;
-        };
-
-        template <>
-        struct customization_point<post_after_tag>
-        {
-            template <typename Executor, typename F, typename ... Ts>
-            HPX_FORCEINLINE
-            auto operator()(Executor && exec,
-                hpx::util::steady_duration const& rel_time,
-                F && f, Ts &&... ts) const;
-        };
-
-        template <>
-        struct customization_point<sync_execute_at_tag>
-        {
-            template <typename Executor, typename F, typename ... Ts>
-            HPX_FORCEINLINE
-            auto operator()(Executor && exec,
-                hpx::util::steady_time_point const& abs_time,
-                F && f, Ts &&... ts) const;
-        };
-
-        template <>
-        struct customization_point<sync_execute_after_tag>
-        {
-            template <typename Executor, typename F, typename ... Ts>
-            HPX_FORCEINLINE
-            auto operator()(Executor && exec,
-                hpx::util::steady_duration const& rel_time,
-                F && f, Ts &&... ts) const;
-        };
-
-        template <>
-        struct customization_point<async_execute_at_tag>
-        {
-            template <typename Executor, typename F, typename ... Ts>
-            HPX_FORCEINLINE
-            auto operator()(Executor && exec,
-                hpx::util::steady_time_point const& abs_time,
-                F && f, Ts &&... ts) const;
-        };
-
-        template <>
-        struct customization_point<async_execute_after_tag>
-        {
-            template <typename Executor, typename F, typename ... Ts>
-            HPX_FORCEINLINE
-            auto operator()(Executor && exec,
-                hpx::util::steady_duration const& rel_time,
-                F && f, Ts &&... ts) const;
-        };
-#endif
-
         // async_execute_at dispatch point
         template <typename Executor, typename F, typename ... Ts>
         HPX_FORCEINLINE auto
@@ -268,16 +205,6 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<F>(f), std::forward<Ts>(ts)...);
         }
 
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Executor, typename F, typename... Ts>
-        HPX_FORCEINLINE auto customization_point<post_after_tag>::operator()(
-            Executor&& exec, hpx::util::steady_duration const& rel_time, F&& f,
-            Ts&&... ts) const
-        {
-            return post_after(std::forward<Executor>(exec), rel_time,
-                std::forward<F>(f), std::forward<Ts>(ts)...);
-        }
-#else
         template <>
         struct customization_point<post_after_tag>
         {
@@ -292,18 +219,7 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<F>(f), std::forward<Ts>(ts)...);
             }
         };
-#endif
 
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Executor, typename F, typename... Ts>
-        HPX_FORCEINLINE auto customization_point<post_at_tag>::operator()(
-            Executor&& exec, hpx::util::steady_time_point const& abs_time,
-            F&& f, Ts&&... ts) const
-        {
-            return post_at(std::forward<Executor>(exec), abs_time,
-                std::forward<F>(f), std::forward<Ts>(ts)...);
-        }
-#else
         template <>
         struct customization_point<post_at_tag>
         {
@@ -318,18 +234,7 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<F>(f), std::forward<Ts>(ts)...);
             }
         };
-#endif
 
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Executor, typename F, typename... Ts>
-        HPX_FORCEINLINE auto customization_point<sync_execute_after_tag>::
-        operator()(Executor&& exec, hpx::util::steady_duration const& rel_time,
-            F&& f, Ts&&... ts) const
-        {
-            return sync_execute_after(std::forward<Executor>(exec), rel_time,
-                std::forward<F>(f), std::forward<Ts>(ts)...);
-        }
-#else
         template <>
         struct customization_point<sync_execute_after_tag>
         {
@@ -344,19 +249,7 @@ namespace hpx { namespace parallel { namespace execution
                     rel_time, std::forward<F>(f), std::forward<Ts>(ts)...);
             }
         };
-#endif
 
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Executor, typename F, typename... Ts>
-        HPX_FORCEINLINE auto customization_point<sync_execute_at_tag>::
-        operator()(Executor&& exec,
-            hpx::util::steady_time_point const& abs_time, F&& f,
-            Ts&&... ts) const
-        {
-            return sync_execute_at(std::forward<Executor>(exec), abs_time,
-                std::forward<F>(f), std::forward<Ts>(ts)...);
-        }
-#else
         template <>
         struct customization_point<sync_execute_at_tag>
         {
@@ -371,19 +264,7 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<F>(f), std::forward<Ts>(ts)...);
             }
         };
-#endif
 
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Executor, typename F, typename... Ts>
-        HPX_FORCEINLINE auto customization_point<async_execute_at_tag>::
-        operator()(Executor&& exec,
-            hpx::util::steady_time_point const& abs_time, F&& f,
-            Ts&&... ts) const
-        {
-            return async_execute_at(std::forward<Executor>(exec), abs_time,
-                std::forward<F>(f), std::forward<Ts>(ts)...);
-        }
-#else
         template <>
         struct customization_point<async_execute_at_tag>
         {
@@ -398,18 +279,7 @@ namespace hpx { namespace parallel { namespace execution
                     std::forward<F>(f), std::forward<Ts>(ts)...);
             }
         };
-#endif
 
-#if defined(HPX_HAVE_CXX14_RETURN_TYPE_DEDUCTION)
-        template <typename Executor, typename F, typename... Ts>
-        HPX_FORCEINLINE auto customization_point<async_execute_after_tag>::
-        operator()(Executor&& exec, hpx::util::steady_duration const& rel_time,
-            F&& f, Ts&&... ts) const
-        {
-            return async_execute_after(std::forward<Executor>(exec), rel_time,
-                std::forward<F>(f), std::forward<Ts>(ts)...);
-        }
-#else
         template <>
         struct customization_point<async_execute_after_tag>
         {
@@ -424,7 +294,6 @@ namespace hpx { namespace parallel { namespace execution
                     rel_time, std::forward<F>(f), std::forward<Ts>(ts)...);
             }
         };
-#endif
 
         /// \endcond
     }
