@@ -267,7 +267,7 @@ favorite compiler with |hpx| visit |hpx_buildbot|_.
 
    You need to build the following Boost libraries for |hpx|: Boost.DateTime,
    Boost.Filesystem, Boost.ProgramOptions, Boost.Regex, Boost.System,
-   Boost.Thread, Boost.Chrono, and Boost.Atomic.
+   Boost.Thread and Boost.Chrono.
 
 Depending on the options you chose while building and installing |hpx|,
 you will find that |hpx| may depend on several other libraries such as those
